@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -21,6 +22,12 @@ public class User {
     private String login;
 
     private String pass;
+
+    @ManyToMany(mappedBy = "likedusersTask")
+    Set<Task> tasks;
+
+    @ManyToMany(mappedBy = "likedusersTeam")
+    Set<Team> teams;
 
     public User() {
     }

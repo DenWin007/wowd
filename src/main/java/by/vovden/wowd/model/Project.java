@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -16,6 +17,9 @@ public class Project {
     private long id;
 
     private String name;
+
+    @ManyToMany(mappedBy = "likedTeamProject")
+    Set<Team> likedTeam;
 
     public Project() {
     }

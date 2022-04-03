@@ -1,5 +1,6 @@
 package by.vovden.wowd.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -16,6 +17,11 @@ public class Unittest {
     private long id;
 
     private String text;
+
+    @ManyToOne
+    @JoinColumn(name = "block_ID", nullable = true)
+    @JsonIgnore
+    private Block blocku;
 
     public Unittest() {
     }
