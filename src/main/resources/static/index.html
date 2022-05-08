@@ -1,10 +1,198 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width"><!-- адаптация ширины для вех экранов -->
+    <title>Workplace</title>
+    <meta name="description" lang="ru" content="Описание содержимого страницы">
+    <meta name="description" lang="en" content="Description">
+    <meta name="keywords" lang="ru" content="Ключевые слова через запятую">
+    <meta name="keywords" lang="en" content="Keywords">
+    <meta name="robots" content="index, follow"> <!-- разрешние индексации роботами -->
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css" />
+    <link rel="stylesheet" href="//ajax.aspnetcdn.com/ajax/jquery.ui/1.13.1/themes/black-tie/jquery-ui.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.ui/1.13.1/jquery-ui.min.js"></script>
+
+    <!-- рабочии скрипты <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/themes/black-tie/jquery-ui.css">
+   <script defer src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script defer src="https://ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>
+     --><!-- Подключаем сценарии -->
+    <style  type="text/css">
+        .testmid {
+            margin: 100px;
+            width: 500px;
+            height: 500px;
+        }
+        .workplace-work-pole {
+            border: 1px solid;
+            width: 100%;
+            height: 100%;
+        }
+        .new_block {
+            position: absolute;
+            top:300px;
+            right:300px;
+            width: 300px;
+            height: 100px;
+            border: 2px solid;
+            border-radius: 10px;
+            transition: 0.2s;
+        }
+    </style>
 </head>
 <body>
-ку-ку
+<div id="dialog-delete-message" title="Подтверждение">
+    <p>
+        Удалить блок?
+    </p>
+</div>
+
+<div class="testmid">
+    <span class="buttonnnn" onclick="createblock()">Добавить блок</span>
+    <span class="buttonnnn" onclick="saveproject()">Сохранить проект</span>
+    <span class="buttonnnn" onclick="cleaneditproject()">Отмена</span>
+    <div class="workplace-work-pole">
+        <div id="dialog" title="Редактирование блока">
+            <form><fieldset>
+                <input class="id" name="id" value="id" >
+                <input class="name" name="name" value="name" >
+                <input class="short" name="short" value="short" >
+                <input class="full" name="full" value="full" >
+                <input class="date_start" name="date_start" value="date_start" >
+                <input class="date_end" name="date_end" value="date_end" >
+                <input class="team" name="team" value="team" >
+                <input class="file" name="file" value="file" >
+            </fieldset></form>
+        </div>
+    </div>
+
+</div>
+<script>
+    var $blockid=1; //переменная для обозначения id новых блоков
+    var $editid=1; //переменная для обозначения id новых блоков
+    $( ".buttonnnn" ).button(); // применияем стили jquery ui ко всему с классом
+    $( "#dialog-delete-message" ).dialog({// создаем диалоговое окно jquery ui подтверждения удаления
+        autoOpen: false,
+        modal: true,
+        buttons: {
+            Да: function() {
+                $( this ).dialog( "close" );
+                $('.new_block').remove(':contains("'+$editid+'")');//удалет элемент класса new_block со все содержимым содержащим заданный id
+            },
+            Нет: function() {
+                $( this ).dialog( "close" );},
+        },
+    });
+    $( "#dialog" ).dialog({// создаем диалоговое окно jquery ui редатирования блока
+        autoOpen: false,
+        show: {
+            effect: "blind",
+            duration: 1,
+        },
+        hide: {
+            effect: "explode",
+            duration: 1,
+        },
+        buttons: {
+            "Применить": function() {
+                saveblock();},
+            "Отмена": function() {
+                $( "#dialog" ).dialog("close");},
+        },
+        close: function() {
+            // делем что нибудь при закрытии окна
+            form[ 0 ].reset();
+        },
+    });
+
+    // для очистки изменений формы диалога
+    form = $( "#dialog" ).find( "form" ).on( "submit", function( event ) {
+        event.preventDefault();
+        saveblock();
+    });
+
+    function shablonblock (param_id, param_name, param_short, param_full, param_date_start, param_date_end, param_team, param_file) {
+        // задаем html код блока который будет выводится при его вставке в javascript для многостройчной переменной и перевода каретки на новую строку в html в конце вставляется \r\n\
+        shablon_block = '<div class="new_block">\r\n\
+    <span class="id" name="id" value="' + param_id + '">id: ' + param_id + '</span><br>\r\n\
+    <span class="name" name="name" value="">имя: ' + param_name + ' </span><br>\r\n\
+    <span class="short" name="short" value="" >краткое описание: ' + param_short + '</span><br>\r\n\
+    <input class="full" name="full" value="' + param_full + '" disabled hidden>\r\n\
+    <input class="date_start" name="date_start" value="' + param_date_start + '" disabled hidden>\r\n\
+    <input class="date_end" name="date_end" value="' + param_date_end + '" disabled hidden>\r\n\
+    <input class="team" name="team" value="' + param_team + '" disabled hidden>\r\n\
+    <input class="file" name="file" value="' + param_file + '" disabled hidden>\r\n\
+    <span class="buttonnnn" onclick="showblock(' + param_id + ')">редактировать блок</span>\r\n\
+    <span class="buttonnnn" onclick="deleteblock(' + param_id + ')">удалить блок</span>\r\n\
+    </div>';
+        return shablon_block;
+    }
+
+    function createblock() {
+        //создаем новый блок
+        var newDiv = $(shablonblock ($blockid,"","","","","","",""));//задаем html код нового блока
+        $blockid++;
+        $(newDiv).appendTo('.workplace-work-pole');//вставляем новый блок после html элемента с классом workplace-work-pole
+        //включаем возможность перетаскивания добавленного обьекта и дальше перечисляем свойства
+        $(newDiv).draggable({
+            containment: ".workplace-work-pole",//ограничиваем перетаскивание html элементом с классом workplace-work
+            scroll: true,//авто включение прокрутки при перетаскивании за границы
+            grid: [10, 10],
+        });
+        $( newDiv ).on( "dragstart", function( event, ui ) {
+            //делаем что нибудь при начале перетаскивания
+        } );
+        $( newDiv ).on( "drag", function( event, ui ) {
+            //делаем что нибудь при перетаскивания
+        } );
+        $( newDiv ).on( "dragstop", function( event, ui ) {
+            //делаем что нибудь при завершении перетаскивания
+        } );
+        $(newDiv).on('click', newDiv, function(){
+            //делаем что нибудь при нажатии на новый блок
+        });
+        $( ".buttonnnn" ).button();// применияем стили jquery ui ко всему с классом
+    }
+    function showblock(id) {
+        //выполняем действия для отображения полного вида блока и его редактирования по id
+        //вернет значения inputa'a
+        $( "#dialog" ).find('input[name="id"]').val(id);
+        $( "#dialog" ).find('input[name="name"]').val();
+        $( "#dialog" ).find('input[name="short"]').val();
+        $( "#dialog" ).find('input[name="full"]').val();
+        $( "#dialog" ).find('input[name="date_start"]').val();
+        $( "#dialog" ).find('input[name="date_end"]').val();
+        $( "#dialog" ).find('input[name="team"]').val();
+        $( "#dialog" ).find('input[name="file"]').val();
+        $( "#dialog" ).dialog("open");
+    }
+    function deleteblock(id) {
+        $editid=id;
+        $( "#dialog-delete-message" ).dialog("open");
+    }
+    function saveproject() {
+        // отправляем данные о положении блоков в базу
+        alert ('сохраняем типа');
+    }
+    function saveblock() {
+        param_id=$( "#dialog" ).find('input[name="id"]').val();
+        param_name=$( "#dialog" ).find('input[name="name"]').val();
+        param_short=$( "#dialog" ).find('input[name="short"]').val();
+        param_full=$( "#dialog" ).find('input[name="full"]').val();
+        param_date_start=$( "#dialog" ).find('input[name="date_start"]').val();
+        param_date_end=$( "#dialog" ).find('input[name="date_end"]').val();
+        param_team=$( "#dialog" ).find('input[name="team"]').val();
+        param_file=$( "#dialog" ).find('input[name="file"]').val();
+        //отправляем данные в базу
+    }
+
+    function cleaneditproject() {
+        // для отмены всех внесенных изменений в проект перезагружаем страницу
+        location.reload(true);
+    }
+
+
+</script>
 </body>
-</html>
+</html>      
